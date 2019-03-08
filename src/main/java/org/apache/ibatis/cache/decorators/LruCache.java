@@ -15,11 +15,11 @@
  */
 package org.apache.ibatis.cache.decorators;
 
+import org.apache.ibatis.cache.Cache;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
-
-import org.apache.ibatis.cache.Cache;
 
 /**
  * Lru (first in, first out) cache decorator
@@ -58,6 +58,7 @@ public class LruCache implements Cache {
 
       //核心就是覆盖 LinkedHashMap.removeEldestEntry方法,
       //返回true或false告诉 LinkedHashMap要不要删除此最老键值
+      // accessOrder = true ，所有的Entry按照访问的顺序排序asd
       //LinkedHashMap内部其实就是每次访问或者插入一个元素都会把元素放到链表末尾，
       //这样不经常访问的键值肯定就在链表开头啦
       @Override

@@ -32,6 +32,7 @@ import org.slf4j.spi.LocationAwareLogger;
 public class Slf4jImpl implements Log {
 
   //代理模式，委派给Slf4jLoggerImpl或者Slf4jLocationAwareLoggerImpl,所以这个类只是一个wrapper
+  // 这里判断slf4j的logger 是否为LocationAwareLogger且版本>=1.6 则返回LocationAwareLogger对象 否则返回Slf4jLoggerImpl对象，兼容slf4j不同版本
   private Log log;
 
   public Slf4jImpl(String clazz) {
@@ -41,7 +42,7 @@ public class Slf4jImpl implements Log {
       try {
         // check for slf4j >= 1.6 method signature
         logger.getClass().getMethod("log", Marker.class, String.class, int.class, String.class, Object[].class, Throwable.class);
-        log = new Slf4jLocationAwareLoggerImpl((LocationAwareLogger) logger);
+        log = new org.apache.ibatis.logging.slf4j.Slf4jLocationAwareLoggerImpl((LocationAwareLogger) logger);
         return;
       } catch (SecurityException e) {
         // fail-back to Slf4jLoggerImpl
@@ -51,7 +52,7 @@ public class Slf4jImpl implements Log {
     }
 
     // Logger is not LocationAwareLogger or slf4j version < 1.6
-    log = new Slf4jLoggerImpl(logger);
+    log = new org.apache.ibatis.logging.slf4j.Slf4jLoggerImpl(logger);
   }
 
   @Override
