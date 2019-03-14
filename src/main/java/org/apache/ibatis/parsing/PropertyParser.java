@@ -31,12 +31,13 @@ public class PropertyParser {
 
   public static String parse(String string, Properties variables) {
     VariableTokenHandler handler = new VariableTokenHandler(variables);
-    GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
+    //有没有对${}比较熟悉，这个符号就是mybatis配置文件中的占位符，例如定义datasource时用到的 <property name="driverClassName" value="${driver}" />
+    org.apache.ibatis.parsing.GenericTokenParser parser = new org.apache.ibatis.parsing.GenericTokenParser("${", "}", handler);
     return parser.parse(string);
   }
 
   //就是一个map，用相应的value替换key
-  private static class VariableTokenHandler implements TokenHandler {
+  private static class VariableTokenHandler implements org.apache.ibatis.parsing.TokenHandler {
     private Properties variables;
 
     public VariableTokenHandler(Properties variables) {

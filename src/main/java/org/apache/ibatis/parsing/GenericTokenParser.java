@@ -28,9 +28,9 @@ public class GenericTokenParser {
   private final String openToken;
   private final String closeToken;
   //记号处理器
-  private final TokenHandler handler;
+  private final org.apache.ibatis.parsing.TokenHandler handler;
 
-  public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {
+  public GenericTokenParser(String openToken, String closeToken, org.apache.ibatis.parsing.TokenHandler handler) {
     this.openToken = openToken;
     this.closeToken = closeToken;
     this.handler = handler;
@@ -41,6 +41,7 @@ public class GenericTokenParser {
     if (text != null && text.length() > 0) {
       char[] src = text.toCharArray();
       int offset = 0;
+      // openToken在text中的位置
       int start = text.indexOf(openToken, offset);
       //#{favouriteSection,jdbcType=VARCHAR}
       //这里是循环解析参数，参考GenericTokenParserTest,比如可以解析${first_name} ${initial} ${last_name} reporting.这样的字符串,里面有3个 ${}

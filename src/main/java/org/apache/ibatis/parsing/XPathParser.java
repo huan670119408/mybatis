@@ -15,12 +15,11 @@
  */
 package org.apache.ibatis.parsing;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import org.apache.ibatis.builder.BuilderException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -28,16 +27,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.ibatis.builder.BuilderException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Clinton Begin
@@ -152,7 +147,7 @@ public class XPathParser {
 	//1.先用xpath解析
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
 	//2.再调用PropertyParser去解析,也就是替换 ${} 这种格式的字符串
-    result = PropertyParser.parse(result, variables);
+    result = org.apache.ibatis.parsing.PropertyParser.parse(result, variables);
     return result;
   }
 
@@ -205,31 +200,31 @@ public class XPathParser {
     return (Double) evaluate(expression, root, XPathConstants.NUMBER);
   }
 
-  public List<XNode> evalNodes(String expression) {
+  public List<org.apache.ibatis.parsing.XNode> evalNodes(String expression) {
     return evalNodes(document, expression);
   }
 
 	//返回节点List
-  public List<XNode> evalNodes(Object root, String expression) {
-    List<XNode> xnodes = new ArrayList<XNode>();
+  public List<org.apache.ibatis.parsing.XNode> evalNodes(Object root, String expression) {
+    List<org.apache.ibatis.parsing.XNode> xnodes = new ArrayList<org.apache.ibatis.parsing.XNode>();
     NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
     for (int i = 0; i < nodes.getLength(); i++) {
-      xnodes.add(new XNode(this, nodes.item(i), variables));
+      xnodes.add(new org.apache.ibatis.parsing.XNode(this, nodes.item(i), variables));
     }
     return xnodes;
   }
 
-  public XNode evalNode(String expression) {
+  public org.apache.ibatis.parsing.XNode evalNode(String expression) {
     return evalNode(document, expression);
   }
 
 	//返回节点
-  public XNode evalNode(Object root, String expression) {
+  public org.apache.ibatis.parsing.XNode evalNode(Object root, String expression) {
     Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
     if (node == null) {
       return null;
     }
-    return new XNode(this, node, variables);
+    return new org.apache.ibatis.parsing.XNode(this, node, variables);
   }
 
   private Object evaluate(String expression, Object root, QName returnType) {
@@ -243,6 +238,9 @@ public class XPathParser {
 
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
+    // mybatis源代码基本上没有什么注释，但是上面这行注释是源代码中自带的。
+    // 那为什么必须在调用commonConstructor函数后才能调用这个函数呢？因为这个函数里面用到了两个属性：validation和entityResolver
+    // 如果在这两个属性没有设置前就调用这个函数，就可能会导致这个类内部属性冲突
     try {
 		//这个是DOM解析方式
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
